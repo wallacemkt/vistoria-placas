@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vistoria Placas — Vitória Salinas</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --ink: #0f172a; /* slate-900 */
+      --muted: #64748b; /* slate-500 */
+      --line: #e2e8f0; /* slate-200 */
+      --card: #ffffff;
+      --accent: #111827;
+      --ring: #94a3b8; /* slate-400 */
+      --shadow: 0 1px 1px rgba(0,0,0,.04), 0 8px 24px rgba(2,6,23,.06);
+      --grad: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #8b5cf6 100%);
+    }
+    /* Dark */
+    .dark {
+      --bg: #0b1220; /* deep slate */
+      --ink: #e2e8f0;
+      --muted: #94a3b8;
+      --line: #1f2937;
+      --card: #0f172a;
+      --accent: #e5e7eb;
+      --ring: #334155;
+      --shadow: 0 1px 1px rgba(0,0,0,.24), 0 8px 28px rgba(0,0,0,.35);
+      --grad: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 50%, #10b981 100%);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
+      Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color: var(--ink); background: var(--bg); }
+
+    .app { max-width: 1100px; margin: 20px auto 80px; padding: 0 16px; }
+
+    header.appbar {
+      position: sticky; top: 0; z-index: 20; background: var(--bg);
+      backdrop-filter: saturate(180%) blur(6px);
+      border-bottom: 1px solid var(--line); padding: 12px 0; margin-bottom: 16px;
+      display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
+    }
+    .brand { display: flex; gap: 12px; align-items: center; min-width: 0; }
+    .logo {
+      width: 36px; height: 36px; border-radius: 10px; background: var(--grad);
+      box-shadow: var(--shadow);
+    }
+    .titlewrap { min-width: 0; }
+    .title { font-weight: 800; font-size: clamp(18px, 2.2vw, 22px); letter-spacing: .2px; }
+    .subtitle { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: .4px; }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    button, .btn, label.btn { border: 1px solid var(--line); background: var(--card); color: var(--accent); font-weight: 700;
+      padding: 10px 14px; border-radius: 12px; cursor: pointer; transition: 140ms ease; box-shadow: var(--shadow);
+      display: inline-flex; align-items: center; gap: 8px; user-select: none; }
+    button:hover, .btn:hover, label.btn:hover { border-color: var(--ring); transform: translateY(-1px); }
+    .pill { border-radius: 999px; }
+    .ghost { background: transparent; box-shadow: none; }
+    .danger { border-color: #fecaca; color: #b91c1c; }
+
+    .searchbar { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; margin-top: 10px; }
+    .input, input[type="text"], input[type="number"], input[type="date"], textarea, select {
+      appearance: none; border: 1px solid var(--line); background: var(--card); color: var(--ink);
+      border-radius: 12px; padding: 10px 12px; font: inherit; outline: none; transition: 140ms ease;
+    }
+    .input:focus, input:focus, textarea:focus, select:focus { border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 26%, transparent); }
+
+    .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+
+    .ficha { border: 1px solid var(--line); border-radius: 16px; background: var(--card); box-shadow: var(--shadow);
+      padding: 16px; page-break-inside: avoid; }
+
+    .fhead { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; justify-content: space-between; }
+    .fmeta { color: var(--muted); font-size: 12px; display: flex; gap: 10px; align-items: center; }
+    .badge { border: 1px solid var(--line); background: color-mix(in oklab, var(--line) 30%, transparent); padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+
+    .row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 12px; color: var(--muted); font-weight: 800; letter-spacing: .35px; text-transform: uppercase; }
+
+    .items { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; margin-top: 10px; }
+    .item { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: center; }
+    .item input[type="checkbox"] { width: 18px; height: 18px; }
+    .note { margin-left: 28px; margin-top: -4px; }
+    .note input { width: 100%; border: 1px dashed var(--line); padding: 8px 10px; border-radius: 10px; background: transparent; }
+
+    .footer { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+
+    details.fold { margin-top: 12px; }
+    details.fold > summary { list-style: none; cursor: pointer; user-select: none; padding: 8px 0; color: var(--muted); font-weight: 700; }
+    details.fold > summary::-webkit-details-marker { display:none; }
+
+    .floating { position: fixed; bottom: 16px; right: 16px; z-index: 30; }
+
+    .stats { color: var(--muted); font-weight: 700; font-size: 12px; }
+
+    /* Impressão */
+    @media print {
+      .no-print, header.appbar, .floating { display: none !important; }
+      body { background: #fff; color: #000; }
+      .app { max-width: none; padding: 0; margin: 0; }
+      .ficha { border-color: #000; border-width: 1px; border-radius: 0; box-shadow: none; }
+      .note input { border-color: #000; }
+      @page { size: A4 portrait; margin: 10mm; }
+      /* Modo 2 por página */
+      .two-per-page [data-ficha]:nth-of-type(2n) { break-after: page; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="appbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="titlewrap">
+          <div class="title">Vitória Salinas — Vistoria de Placas</div>
+          <div class="subtitle">Programa HTML moderno com autosave, tema escuro e exportação</div>
+        </div>
+      </div>
+      <div class="toolbar no-print">
+        <button type="button" id="newBtn" class="pill">➕ Nova ficha</button>
+        <button type="button" id="duplicateLastBtn" class="pill" title="Cria uma cópia da última ficha">⎘ Duplicar</button>
+        <button type="button" id="exportBtn" class="pill">⤓ Exportar JSON</button>
+        <label class="btn pill" for="importInput">⤒ Importar JSON</label>
+        <input id="importInput" type="file" accept="application/json" hidden />
+        <button type="button" id="printBtn" class="pill">🖨️ Imprimir / PDF</button>
+        <button type="button" id="clearAllBtn" class="pill danger">🗑️ Limpar</button>
+      </div>
+      <div class="searchbar no-print">
+        <input id="searchInput" class="input" placeholder="Buscar por placa, local, Nº ou referência..." />
+        <label class="btn ghost pill" style="gap:6px;">
+          <input id="darkToggle" type="checkbox" style="accent-color:#6366f1; width:16px; height:16px;"> Tema escuro
+        </label>
+        <label class="btn ghost pill" style="gap:6px;">
+          <input id="twoPerPageToggle" type="checkbox" style="accent-color:#6366f1; width:16px; height:16px;"> 2 por página (print)
+        </label>
+      </div>
+    </header>
+
+    <div class="stats no-print" id="stats" style="margin: 6px 0 12px;"></div>
+
+    <div class="grid" id="fichas"></div>
+
+    <button class="floating btn pill no-print" id="floatingNew">➕ Nova ficha</button>
+  </div>
+
+  <template id="fichaTemplate">
+    <section class="ficha" data-ficha>
+      <div class="fhead">
+        <div>
+          <div class="title" style="font-size:16px;">VITÓRIA SALINAS</div>
+          <div class="subtitle">VISTORIA PLACAS SALINAS</div>
+        </div>
+        <div class="fmeta">
+          <span class="badge" data-badge-id>Ficha — #0001</span>
+          <span class="badge" data-progress>0/10 itens</span>
+          <button type="button" class="btn ghost pill small" data-collapse>Recolher</button>
+          <button type="button" class="btn ghost pill small" data-dup>Duplicar</button>
+          <button type="button" class="btn ghost pill small danger" data-remove>Remover</button>
+        </div>
+      </div>
+
+      <details class="fold" open>
+        <summary>Campos principais</summary>
+        <div class="row" style="margin-top:12px;">
+          <div class="field" style="grid-column: span 2;">
+            <label>ANO</label>
+            <input type="number" min="1900" max="2100" placeholder="2025" name="ano"/>
+          </div>
+          <div class="field" style="grid-column: span 2;">
+            <label>N.º</label>
+            <input type="text" placeholder="0001" name="numero" />
+          </div>
+          <div class="field" style="grid-column: span 3;">
+            <label>PLACA</label>
+            <input type="text" placeholder="Identificação da placa" name="placa" />
+          </div>
+          <div class="field" style="grid-column: span 3;">
+            <label>LOCAL</label>
+            <input type="text" placeholder="Endereço / Ponto de referência" name="local" />
+          </div>
+          <div class="field" style="grid-column: span 2;">
+            <label>REF.</label>
+            <input type="text" placeholder="Código / Referência" name="ref" />
+          </div>
+        </div>
+      </details>
+
+      <details class="fold" open>
+        <summary>Checklist e observações</summary>
+        <div class="items">
+          <div>
+            <div class="item"><input type="checkbox" name="REFORMA"><label>REFORMA</label></div>
+            <div class="note"><input type="text" placeholder="Observações (opcional)" data-note="REFORMA"></div>
+          </div>
+          <div>
+            <div class="item"><input type="checkbox" name="MOLDURA"><label>MOLDURA</label></div>
+            <div class="note"><input type="text" placeholder="Observações (opcional)" data-note="MOLDURA"></div>
+          </div>
+          <div>
+            <div class="item"><input type="checkbox" name="ESCORA"><label>ESCORA</label></div>
+            <div class="note"><input type="text" placeholder="Observações (opcional)" data-note="ESCORA"></div>
+          </div>
+          <div>
+            <div class="item"><input type="checkbox" name="PERNAMANCA_PLACA"><label>PERNAMANCA PLACA</label></div>
+            <div class="note"><input type="text" placeholder="Observações (opcional)" data-note="PERNAMANCA_PLACA"></div>
+          </div>
+          <div>
+            <div class="item"><input type="checkbox" name="PIQUETE"><label>PIQUETE</label></div>
+            <div class="note"><input type="text" placeholder="Observações (opcional)" data-note="PIQUETE"></div>
+          </div>
+          <div>
+            <div class="item"><input type="checkbox" name="PLAQUINHA"><label>PLAQUINHA</label></div>
+            <div class="note"><input type="text" placeholder="Observações (opcional)" data-note="PLAQUINHA"></div>
+          </div>
+          <div>
+            <div class="item"><input type="checkbox" name="NUMERO_PLACA"><label>NÚMERO PLACA</label></div>
+            <div class="note"><input type="text" placeholder="Observações (opcional)" data-note="NUMERO_PLACA"></div>
+          </div>
+          <div>
+            <div class="item"><input type="checkbox" name="MATO"><label>MATO</label></div>
+            <div class="note"><input type="text" placeholder="Observações (opcional)" data-note="MATO"></div>
+          </div>
+          <div>
+            <div class="item"><input type="checkbox" name="MODULO_PLACA"><label>MÓDULO PLACA</label></div>
+            <div class="note"><input type="text" placeholder="Observações (opcional)" data-note="MODULO_PLACA"></div>
+          </div>
+          <div>
+            <div class="item"><input type="checkbox" name="ESTEIOS"><label>ESTEIOS</label></div>
+            <div class="note"><input type="text" placeholder="Observações (opcional)" data-note="ESTEIOS"></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="fold" open>
+        <summary>Finalização</summary>
+        <div class="footer">
+          <div class="field">
+            <label>FOTOPROX. VISTORIA (DATA)</label>
+            <input type="date" name="proxima_vistoria" />
+          </div>
+          <div class="field">
+            <label>VISTORIA POR</label>
+            <input type="text" placeholder="Nome do responsável" name="vistoria_por" />
+          </div>
+        </div>
+      </details>
+    </section>
+  </template>
+
+  <script>
+    const LS_KEY = 'vistoria_placas_v1';
+    const THEME_KEY = 'vistoria_theme';
+    const fichas = document.getElementById('fichas');
+    const tpl = document.getElementById('fichaTemplate');
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    const pad4 = n => String(n).padStart(4, '0');
+    const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36).slice(2);
+
+    function currentYear(){ return new Date().getFullYear(); }
+
+    function addFicha(prefill = {}) {
+      const node = tpl.content.cloneNode(true);
+      const section = node.querySelector('[data-ficha]');
+      section.dataset.id = prefill.id || uid();
+
+      // preencher padrões
+      const year = prefill.ano || currentYear();
+      setVal(section, 'ano', year);
+
+      // Prefill resto
+      Object.entries(prefill).forEach(([name, value]) => {
+        if (name === 'ano') return; // já setado
+        const input = section.querySelector(`[name="${name}"]`);
+        if (!input) return;
+        if (input.type === 'checkbox') input.checked = Boolean(value);
+        else input.value = value;
+      });
+
+      // ativar notas conforme checkbox
+      section.querySelectorAll('.item input[type="checkbox"]').forEach(cb => {
+        const note = section.querySelector(`.note input[data-note="${cb.name}"]`);
+        const toggle = () => note.disabled = !cb.checked;
+        cb.addEventListener('change', () => { toggle(); updateProgress(section); saveDebounced(); updateStats(); });
+        toggle();
+      });
+
+      // ações
+      $('[data-remove]', section).addEventListener('click', () => { section.remove(); updateStats(); saveDebounced(); });
+      $('[data-dup]', section).addEventListener('click', () => { duplicateFicha(section); });
+      $('[data-collapse]', section).addEventListener('click', () => {
+        $$('.fold', section).forEach(d => d.open = !d.open);
+      });
+
+      // atualizar badge id
+      const count = fichas.querySelectorAll('[data-ficha]').length + 1;
+      $('[data-badge-id]', section).textContent = `Ficha — #${pad4(count)}`;
+
+      fichas.appendChild(node);
+
+      // listeners gerais
+      $$('[name], .note input', section).forEach(el => {
+        el.addEventListener('input', () => { updateProgress(section); saveDebounced(); updateStats(); });
+      });
+
+      // se o campo número estiver vazio, gerar sequencial
+      const numero = $('[name="numero"]', section);
+      if (!numero.value) numero.value = pad4(nextSequenceNumber());
+
+      updateProgress(section);
+      updateStats();
+      return section;
+    }
+
+    function duplicateFicha(section){
+      const data = getFichaData(section);
+      delete data.id;
+      addFicha(data);
+    }
+
+    function setVal(section, name, value){
+      const el = section.querySelector(`[name="${name}"]`);
+      if (el){ if (el.type === 'checkbox') el.checked = !!value; else el.value = value; }
+    }
+
+    function getFichaData(section){
+      const data = { id: section.dataset.id };
+      $$('[name]', section).forEach(el => { data[el.name] = (el.type === 'checkbox') ? el.checked : el.value; });
+      $$('.note input', section).forEach(el => { data[`note_${el.dataset.note}`] = el.value; });
+      return data;
+    }
+
+    function serializeAll(){
+      return $$('#fichas [data-ficha]').map(sec => getFichaData(sec));
+    }
+
+    function loadFromLS(){
+      try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e){ return []; }
+    }
+
+    function saveToLS(){
+      const data = serializeAll();
+      localStorage.setItem(LS_KEY, JSON.stringify(data));
+    }
+
+    let saveTimer;
+    function saveDebounced(){
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveToLS, 300);
+    }
+
+    function nextSequenceNumber(){
+      const nums = serializeAll().map(d => parseInt(d.numero, 10)).filter(n => !isNaN(n));
+      const max = nums.length ? Math.max(...nums) : 0;
+      return max + 1;
+    }
+
+    function updateProgress(section){
+      const checks = $$('.item input[type="checkbox"]', section);
+      const checked = checks.filter(cb => cb.checked).length;
+      $('[data-progress]', section).textContent = `${checked}/${checks.length} itens`;
+    }
+
+    function updateStats(){
+      const cards = $$('#fichas [data-ficha]');
+      let totalChecks = 0, totalItems = 0;
+      cards.forEach(sec => {
+        const checks = $$('.item input[type="checkbox"]', sec);
+        totalChecks += checks.filter(c => c.checked).length;
+        totalItems += checks.length;
+      });
+      $('#stats').textContent = `${cards.length} ficha(s) • ${totalChecks}/${totalItems} itens marcados`;
+    }
+
+    // Filtros e busca
+    const searchInput = $('#searchInput');
+    function normalize(t){ return (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+    searchInput.addEventListener('input', () => {
+      const q = normalize(searchInput.value);
+      $$('#fichas [data-ficha]').forEach(sec => {
+        const txt = [
+          $('[name="placa"]', sec)?.value,
+          $('[name="local"]', sec)?.value,
+          $('[name="numero"]', sec)?.value,
+          $('[name="ref"]', sec)?.value
+        ].map(normalize).join(' ');
+        sec.style.display = txt.includes(q) ? '' : 'none';
+      });
+    });
+
+    // Toolbar global
+    $('#newBtn').addEventListener('click', () => addFicha());
+    $('#floatingNew').addEventListener('click', () => addFicha());
+
+    $('#duplicateLastBtn').addEventListener('click', () => {
+      const all = $$('#fichas [data-ficha]');
+      if (!all.length) { addFicha(); return; }
+      duplicateFicha(all[all.length - 1]);
+    });
+
+    $('#printBtn').addEventListener('click', () => window.print());
+
+    $('#clearAllBtn').addEventListener('click', () => {
+      if (confirm('Limpar todas as fichas e apagar o autosave?')) {
+        fichas.innerHTML = '';
+        localStorage.removeItem(LS_KEY);
+        addFicha();
+      }
+    });
+
+    // Exportar / Importar JSON
+    $('#exportBtn').addEventListener('click', () => {
+      const data = JSON.stringify(serializeAll(), null, 2);
+      const blob = new Blob([data], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `vistoria_${new Date().toISOString().slice(0,10)}.json`;
+      a.click(); URL.revokeObjectURL(url);
+    });
+
+    $('#importInput').addEventListener('change', (e) => {
+      const file = e.target.files?.[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const arr = JSON.parse(reader.result);
+          rebuild(arr);
+          saveToLS();
+        } catch(err){ alert('Arquivo inválido.'); }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    function rebuild(arr){
+      fichas.innerHTML = '';
+      (arr || []).forEach(data => addFicha(data));
+      if (!arr?.length) addFicha();
+    }
+
+    // Tema (dark)
+    const darkToggle = $('#darkToggle');
+    function applyTheme(){
+      const saved = localStorage.getItem(THEME_KEY);
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? saved === 'dark' : prefersDark;
+      document.body.classList.toggle('dark', isDark);
+      darkToggle.checked = isDark;
+    }
+    applyTheme();
+    darkToggle.addEventListener('change', () => {
+      document.body.classList.toggle('dark', darkToggle.checked);
+      localStorage.setItem(THEME_KEY, darkToggle.checked ? 'dark' : 'light');
+    });
+
+    // 2 por página (print)
+    const twoPerPageToggle = $('#twoPerPageToggle');
+    function applyTwoPer(){ document.body.classList.toggle('two-per-page', twoPerPageToggle.checked); }
+    twoPerPageToggle.addEventListener('change', applyTwoPer);
+
+    // Inicialização: carregar autosave ou criar uma
+    (function init(){
+      const data = loadFromLS();
+      if (Array.isArray(data) && data.length) rebuild(data); else addFicha();
+    })();
+
+    // Atalhos rápidos
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p'){ e.preventDefault(); window.print(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n'){ e.preventDefault(); addFicha(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'e'){ e.preventDefault(); $('#exportBtn').click(); }
+    });
+  </script>
+</body>
+</html>
