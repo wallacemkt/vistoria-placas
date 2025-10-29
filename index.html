@@ -15,19 +15,13 @@
   body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:var(--ink);background:var(--bg)}
 
   .app{max-width:1100px;margin:20px auto 80px;padding:0 16px}
-  header.appbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 0;margin-bottom:16px}
-  .bar{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
-  .brand{display:flex;gap:12px;align-items:center;min-width:0}
-  .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 50%,#8b5cf6 100%)}
-  .title{font-weight:800;font-size:clamp(18px,2.2vw,22px);letter-spacing:.2px}
-  .subtitle{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:12px;letter-spacing:.4px}
-  .toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
-  .btn,label.btn{border:1px solid var(--line);background:var(--card);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700}
-  .pill{border-radius:999px}
-  .ghost{background:transparent}
-  .stats{color:var(--muted);font-weight:700;font-size:12px;margin:6px 0 12px}
   .grid{display:grid;gap:16px}
   .floating{position:fixed;bottom:16px;right:16px;z-index:30}
+  .btn,label.btn{border:1px solid var(--line);background:var(--card);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700}
+
+  /* Ações no final da página */
+  .page-actions{display:flex;justify-content:center;margin:24px 0 40px;gap:10px}
+  .btn.big{padding:14px 18px;font-size:16px;border-radius:999px}
 
   /* --- FICHA (tela) --- */
   .ficha{border:1px solid var(--line);border-radius:16px;background:var(--card);padding:16px;box-shadow:0 1px 1px rgba(0,0,0,.04),0 8px 24px rgba(2,6,23,.06)}
@@ -46,12 +40,10 @@
   .footer{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-top:12px}
   .foto-wrap{display:flex;align-items:center;gap:8px;font-weight:800}
   .divider{height:1px;background:var(--line);margin:12px 0}
-  .hide-print{display:block}
 
   /* --- Mobile --- */
   @media (max-width: 768px){
     .app{margin:10px auto 40px;padding:0 8px}
-    .toolbar{flex-direction:column;align-items:stretch}
     .meta{grid-template-columns:1fr 1fr}
     .items{grid-template-columns:1fr}
     .footer{grid-template-columns:1fr}
@@ -61,13 +53,13 @@
   @media print{
     :root{--bg:#fff;--ink:#000;--muted:#000;--line:#000;--brand:#b63026}
     body{background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif}
-    .no-print, header.appbar, .floating{display:none !important}
+    .no-print, .floating{display:none !important}
     .app{max-width:none;padding:0;margin:0}
     @page{size:A4 portrait;margin:10mm}
 
     /* DUAS FICHAS POR PÁGINA */
     .ficha{border:0;border-radius:0;box-shadow:none;padding:0 2mm 0 0;break-inside:avoid;height:130mm}
-    .ficha:nth-of-type(2n){break-after:page;} /* quebra após a 2ª de cada página */
+    .ficha:nth-of-type(2n){break-after:page;}
     .divider{height:1.2pt;background:#000;margin:8mm 0}
 
     .pdf-title{font-size:17pt;letter-spacing:.2pt}
@@ -103,33 +95,15 @@
 
 <body>
   <div class="app" id="app">
-    <header class="appbar">
-      <div class="bar">
-        <div class="brand">
-          <div class="logo" aria-hidden="true"></div>
-          <div>
-            <div class="title">VITORIA SALINAS — Vistoria de Placas</div>
-            <div class="subtitle">Aplicativo web com impressão fiel ao formulário</div>
-          </div>
-        </div>
-        <div class="toolbar no-print">
-          <button class="btn pill" id="newBtn">➕ Nova ficha</button>
-          <button class="btn pill" id="dupBtn">⎘ Duplicar última</button>
-          <label class="btn pill" for="importJson">⤒ Importar JSON</label>
-          <input id="importJson" type="file" accept="application/json" hidden>
-          <button class="btn pill" id="exportBtn">⤓ Exportar JSON</button>
-          <button class="btn pill" id="printBtn">🖨️ Imprimir / PDF</button>
-          <button class="btn pill" id="clearBtn" style="border-color:#fecaca;color:#b91c1c">🗑️ Limpar</button>
-        </div>
-      </div>
-      <div class="toolbar no-print" style="margin-top:8px;justify-content:flex-start;gap:8px;">
-        <input id="searchInput" class="line-input" placeholder="Buscar por placa, local, Nº ou referência..." />
-      </div>
-    </header>
-
-    <div class="stats no-print" id="stats"></div>
     <div class="grid" id="fichas"></div>
-    <button class="floating btn pill no-print" id="floatingNew">➕ Nova ficha</button>
+
+    <!-- Botão de gerar PDF no final da página -->
+    <div class="page-actions no-print">
+      <button class="btn big" id="printBottomBtn">🖨️ Gerar PDF</button>
+    </div>
+
+    <!-- Botão flutuante (opcional) para adicionar ficha -->
+    <button class="floating btn no-print" id="floatingNew">➕ Nova ficha</button>
   </div>
 
   <!-- TEMPLATE -->
@@ -215,7 +189,7 @@
   </template>
 
 <script>
-  const LS_KEY = 'vistoria_placas_v3';
+  const LS_KEY = 'vistoria_placas_v4';
   const fichas = document.getElementById('fichas');
   const tpl = document.getElementById('tpl');
 
@@ -243,7 +217,7 @@
       toggle(); cb.addEventListener('change',()=>{ toggle(); saveDebounced(); });
     });
 
-    // ANO no cabeçalho segue o campo 'ano'
+    // ANO do cabeçalho segue o campo 'ano'
     const yearSpan = $('[data-year]', sec);
     const anoInput = $('[name="ano"]', sec);
     const syncYear = ()=> yearSpan.textContent = anoInput.value || '2025';
@@ -254,7 +228,6 @@
 
     fichas.appendChild(frag);
     saveDebounced();
-    updateStats();
   }
 
   function setVal(root,name,val){
@@ -288,67 +261,14 @@
     return (nums.length ? Math.max(...nums) : 0) + 1;
   }
 
-  function updateStats(){
-    const cards = $$('#fichas [data-ficha]');
-    let totalChecks = 0, totalItems = 0;
-    cards.forEach(sec=>{
-      const checks = $$('.rowitem input[type="checkbox"]', sec);
-      totalChecks += checks.filter(c=>c.checked).length;
-      totalItems += checks.length;
-    });
-    const el = document.getElementById('stats');
-    if(el) el.textContent = `${cards.length} ficha(s) • ${totalChecks}/${totalItems} itens marcados`;
-  }
-
-  // Busca
-  const searchInput = document.getElementById('searchInput');
-  const normalize = t => (t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  searchInput.addEventListener('input', ()=>{
-    const q = normalize(searchInput.value);
-    $$('#fichas [data-ficha]').forEach(sec=>{
-      const txt = [
-        $('[name="placa"]', sec)?.value,
-        $('[name="local"]', sec)?.value,
-        $('[name="numero"]', sec)?.value,
-        $('[name="ref"]', sec)?.value
-      ].map(normalize).join(' ');
-      sec.style.display = txt.includes(q) ? '' : 'none';
-    });
-  });
-
-  // Toolbar
-  document.getElementById('newBtn').addEventListener('click', ()=> addFicha());
+  // Botões
   document.getElementById('floatingNew').addEventListener('click', ()=> addFicha());
-  document.getElementById('dupBtn').addEventListener('click', ()=>{
-    const all = $$('#fichas [data-ficha]');
-    if(!all.length){ addFicha(); return; }
-    const last = serialize().slice(-1)[0]; delete last.id; addFicha(last);
-  });
-  document.getElementById('printBtn').addEventListener('click', ()=> window.print());
-  document.getElementById('clearBtn').addEventListener('click', ()=>{
-    if(confirm('Limpar todas as fichas e apagar o autosave?')){
-      localStorage.removeItem(LS_KEY); fichas.innerHTML=''; addFicha(); updateStats();
-    }
-  });
-  document.getElementById('exportBtn').addEventListener('click', ()=>{
-    const data = JSON.stringify(serialize(), null, 2);
-    const blob = new Blob([data], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download=`vistoria_${new Date().toISOString().slice(0,10)}.json`; a.click();
-    URL.revokeObjectURL(url);
-  });
-  document.getElementById('importJson').addEventListener('change', e=>{
-    const file = e.target.files?.[0]; if(!file) return;
-    const r = new FileReader();
-    r.onload = ()=>{ try{ rebuild(JSON.parse(r.result)); }catch{ alert('JSON inválido.'); } };
-    r.readAsText(file); e.target.value='';
-  });
+  document.getElementById('printBottomBtn').addEventListener('click', ()=> window.print());
 
   // Atalhos
   window.addEventListener('keydown', e=>{
     if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='p'){ e.preventDefault(); window.print(); }
     if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='n'){ e.preventDefault(); addFicha(); }
-    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='e'){ e.preventDefault(); document.getElementById('exportBtn').click(); }
   });
 
   // Init
