@@ -95,6 +95,52 @@
     .floating { position: fixed; bottom: 16px; right: 16px; z-index: 30; }
 
     .stats { color: var(--muted); font-weight: 700; font-size: 12px; }
+ /* Responsivo para mobile e notebook */
+    @media (max-width: 768px) {
+      .app {
+        margin: 10px auto 40px;
+        padding: 0 8px;
+      }
+      .row {
+        grid-template-columns: 1fr;
+      }
+      .items {
+        grid-template-columns: 1fr;
+      }
+      .footer {
+        grid-template-columns: 1fr;
+      }
+      .searchbar {
+        grid-template-columns: 1fr;
+      }
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+  /* Responsivo para mobile e notebook */
+    @media (max-width: 768px) {
+      .app {
+        margin: 10px auto 40px;
+        padding: 0 8px;
+      }
+      .row {
+        grid-template-columns: 1fr;
+      }
+      .items {
+        grid-template-columns: 1fr;
+      }
+      .footer {
+        grid-template-columns: 1fr;
+      }
+      .searchbar {
+        grid-template-columns: 1fr;
+      }
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+   }
 
     /* Impressão — layout responsivo */
     @media print {
